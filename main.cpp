@@ -12,6 +12,9 @@ using std::endl;
 using std::ios;
 
 
+int SCALE = 50;
+
+
 enum class FunctionType
 {
     Linear,
@@ -92,88 +95,6 @@ float calculate_integral_trapezoid(float (*f)(float), float a, float b, int n)
 }
 
 
-class Function
-{
-private:
-    FunctionType type;
-    std::function<float(float)> f;
-    float* parameters;
-
-public:
-    Function(FunctionType t, float* params)
-    {
-        this->type = t;
-        int size;
-        switch (t)
-        {
-        case FunctionType::Linear:
-            size = 2;
-
-            break;
-        case FunctionType::Quadric:
-            size = 3;
-            break;
-        case FunctionType::Qubic:
-            size = 4;
-            break;
-        case FunctionType::Sin:
-            size = 4;
-            break;
-        case FunctionType::Cos:
-            size = 4;
-            break;
-        case FunctionType::Log:
-            size = 5;
-            break;
-        case FunctionType::A_x:
-            size = 5;
-            break;
-        }
-
-        this->parameters = new float[size];
-
-        for (int i = 0; i < size; i++)
-        {
-            this->parameters[i] = params[i];
-        }
-    }
-
-    //5648678777777777777777777777777777777777777777777777777777777777777
-    float calcualate_ranged_integral(float x1, float x2, int n)
-    {
-        switch (this->get_type())
-        {
-        case FunctionType::Linear:
-            float k = this->parameters[0], b = this->parameters[1];
-            return calculate_integral_left_rectangle([k, b](float x) {return k * x + b;}, x1, x2, n);
-
-        case FunctionType::Quadric:
-            float a = this->parameters[0], b = this->parameters[1], c = this->parameters[2];
-            return calculate_integral_left_rectangle([a, b, c](float x) {return a * x * x + b * x + c; }, x1, x2, n);
-
-        case FunctionType::Qubic:
-            float a = this->parameters[0], b = this->parameters[1], c = this->parameters[2], d = this->parameters[3];
-            return calculate_integral_left_rectangle([a, b, c, d](float x) {return a * x * x * x + b * x * x + c * x + d; }, x1, x2, n);
-        };
-    }
-    FunctionType get_type() { return this->type; }
-
-    void add_graphic_to_vector(std::vector <sf::VertexArray>& v, float x1, float x2, int n)
-    {
-        float dx = (x2 - x1) / n;
-        //std::cout << dx << std::endl;
-        float x_i = x1;
-        float ans = 0;
-        while (x_i < x2) {
-            float x_i1 = x_i + dx;
-            //float dy = f(a, b, c, x_i1) - f(a, b, c, x_i);
-            ans += f(x_i1) * dx;
-            x_i += dx;
-        }
-    }
-};
-
-
 class Camera
 {
 private:
@@ -200,6 +121,114 @@ public:
 };
 
 
+class Function
+{
+private:
+    FunctionType type;
+    std::function<float(float)> f;
+    //float* parameters;
+
+public:
+    Function(FunctionType t, float* params)
+    {
+        this->type = t;
+        int size;
+        cout << "1\n";
+        switch (t)
+        {
+        case FunctionType::Linear:
+        {
+            size = 2;
+            float k = params[0], b = params[1];
+            this->f = [k, b](float x) { return k * x + b; };
+            //cout << this->f(3);
+            break;
+        }
+        case FunctionType::Quadric:
+        {
+            size = 3;
+            float a = params[0], b = params[1], c = params[2];
+            this->f = [a, b, c](float x) {return a * x * x + b * x + c; };
+
+            break;
+        }
+        case FunctionType::Qubic:
+            size = 4;
+            break;
+        case FunctionType::Sin:
+            size = 4;
+            break;
+        case FunctionType::Cos:
+            size = 4;
+            break;
+        case FunctionType::Log:
+            size = 5;
+            break;
+        case FunctionType::A_x:
+            size = 5;
+            break;
+        }
+
+        //this->parameters = new float[size];
+
+        //for (int i = 0; i < size; i++)
+        //{
+        //    this->parameters[i] = params[i];
+        //}
+    }
+
+    //5648678777777777777777777777777777777777777777777777777777777777777
+    float calcualate_ranged_integral(float x1, float x2, int n)
+    {
+        switch (this->get_type())
+        {
+            case FunctionType::Linear:
+            {
+                return calculate_integral_left_rectangle(this->f, x1, x2, n);
+            }
+
+            case FunctionType::Quadric:
+            {
+                return calculate_integral_left_rectangle(this->f, x1, x2, n);
+            }
+
+            //case FunctionType::Qubic:
+            //{
+            //    float a = this->parameters[0], b = this->parameters[1], c = this->parameters[2], d = this->parameters[3];
+            //    return calculate_integral_left_rectangle([a, b, c, d](float x) {return a * x * x * x + b * x * x + c * x + d; }, x1, x2, n);
+            //}
+        };
+    }
+    FunctionType get_type() { return this->type; }
+
+    void add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray>& v, float x1, float x2, int n);
+};
+
+
+void Function::add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray>& v, float x1, float x2, int n)
+{
+    float dx = (x2 - x1) / n;
+    //std::cout << dx << std::endl;
+    float x_i = x1;
+    while (x_i < x2) {
+        float x_i1 = x_i + dx;
+
+        sf::VertexArray line(sf::PrimitiveType::Lines, 2);
+        auto c1 = camera.calculate_position(x_i * SCALE, -this->f(x_i) * SCALE);
+        auto c2 = camera.calculate_position(x_i1 * SCALE, -this->f(x_i1) * SCALE);
+        line[0].position = sf::Vector2f(c1.first, c1.second);
+        line[1].position = sf::Vector2f(c2.first, c2.second);
+
+        line[0].color = sf::Color({ 200, 0, 0 });
+        line[1].color = sf::Color({ 200, 0, 0 });
+
+        v.push_back(line);
+
+        x_i += dx;
+    }
+}
+
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Graphics");
@@ -208,7 +237,25 @@ int main()
     bool moving_camera = false;
     std::pair<int, int> previous_position;
 
+    float params[3];
+
+    params[0] = 0.1;
+    params[1] = 0;
+    params[2] = 1;
+
+    Function f(FunctionType::Quadric, params);
+
+    //float params[2];
+
+    //params[0] = 2;
+    //params[1] = 2;
+
+    //Function f(FunctionType::Linear, params);
+
     std::vector <sf::VertexArray> lines;
+    //std::vector <sf::VertexArray> lines;
+
+    //f.add_graphic_to_vector(camera, lines, -2, 2, 10);
 
     while (window.isOpen())
     {
@@ -264,7 +311,13 @@ int main()
         window.draw(line1);
         window.draw(line2);
 
-        //window.draw(circle);
+        lines.clear();
+        f.add_graphic_to_vector(camera, lines, -5, 5, 100);
+
+        for (auto line : lines)
+        {
+            window.draw(line);
+        }
 
         window.display();
     }
