@@ -115,15 +115,22 @@ private:
     int scale;
     std::pair<float, float> range;
     int samples;
+    std::pair<float, float> integral_range;
+    int integral_samples;
+    IntegralType integral_type;
 
 public:
-    Camera(float x, float y, int scale, float x1, float x2, int n)
+    Camera(float x, float y, int scale, float x1, float x2, int n, float i_x1, float i_x2, int i_n, IntegralType integral_type)
     {
         this->x = x;
         this->y = y;
         this->scale = scale;
         this->range = std::make_pair(x1, x2);
         this->samples = n;
+
+        this->integral_range = std::make_pair(i_x1, i_x2);
+        this->integral_samples = i_n;
+        this->integral_type = integral_type;
     }
 
     void move(int dx, int dy)
@@ -148,25 +155,19 @@ public:
         }
     }
 
-    std::pair<float, float> calculate_position(float x, float y)
-    {
-        return std::make_pair(x - this->x, y - this->y);
-    }
+    std::pair<float, float> calculate_position(float x, float y) { return std::make_pair(x - this->x, y - this->y); }
 
-    std::pair<float, float> get_range()
-    {
-        return range;
-    }
+    std::pair<float, float> get_range() { return range; }
 
-    int get_samples()
-    {
-        return samples;
-    }
+    std::pair<float, float> get_integral_range() { return integral_range; }
 
-    int get_scale()
-    {
-        return this->scale;
-    }
+    int get_integral_samples() { return integral_samples; }
+
+    IntegralType get_integral_type() { return integral_type; }
+
+    int get_samples() { return samples; } 
+
+    int get_scale() { return this->scale; } 
 };
 
 
@@ -251,7 +252,7 @@ public:
     FunctionType get_type() { return this->type; }
 
     void add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray>& v);
-    void add_integral_to_vector(Camera camera, std::vector <sf::ConvexShape>& v, float x1, float x2, int n, IntegralType type);
+    void add_integral_to_vector(Camera camera, std::vector <sf::ConvexShape>& v);
 };
 
 
@@ -289,10 +290,11 @@ void Function::add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray
 }
 
 
-void Function::add_integral_to_vector(Camera camera, std::vector <sf::ConvexShape>& v, float x1, float x2, int n, IntegralType type)
+void Function::add_integral_to_vector(Camera camera, std::vector <sf::ConvexShape>& v)
 {
-    //float x1 = camera.get_range().first, x2 = camera.get_range().second;
-    //int n = camera.get_samples();
+    float x1 = camera.get_integral_range().first, x2 = camera.get_integral_range().second;
+    int n = camera.get_integral_samples();
+    IntegralType type = camera.get_integral_type();
 
     //int x1 = -10, x2 = 10, n = 200;
 
@@ -400,7 +402,7 @@ int main()
 
     //int *scale = &SCALE;
 
-    Camera camera(-20, -580, SCALE, -10, 10, 200);
+    Camera camera(-20, -580, SCALE, -10, 10, 200, 0, 3, 20, IntegralType::MiddleRectangle);
     bool moving_camera = false;
     std::pair<int, int> previous_position;
 
@@ -505,7 +507,7 @@ int main()
         lines.clear();
         integral_rectangles.clear();
         f.add_graphic_to_vector(camera, lines);
-        f.add_integral_to_vector(camera, integral_rectangles, 0, 3, 20, IntegralType::MiddleRectangle);
+        f.add_integral_to_vector(camera, integral_rectangles);
 
         draw_fancy(window, fancy_lines, camera);
 
