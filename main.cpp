@@ -14,6 +14,7 @@ using std::ios;
 
 int SCALE = 50;
 int SCALE_CHANGE = 2;
+int SAMPLE_CHANGE = 1;
 
 
 enum class FunctionType
@@ -120,6 +121,14 @@ public:
     {
         this->x += dx;
         this->y += dy;
+    }
+
+    void change_sample(int d)
+    {
+        if (this->samples + d > 0)
+        {
+            this->samples += d;
+        }
     }
 
     std::pair<int, int> calculate_position(int x, int y)
@@ -230,7 +239,7 @@ public:
 
 void Function::add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray>& v)
 {
-    int x2 = camera.get_range().first, x1 = camera.get_range().second;
+    int x1 = camera.get_range().first, x2 = camera.get_range().second;
     int n = camera.get_samples();
 
     float dx = (x2 - x1) / n;
@@ -249,6 +258,7 @@ void Function::add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray
         line[1].color = sf::Color({ 200, 0, 0 });
 
         v.push_back(line);
+        //cout << "1\n";
 
         x_i += dx;
     }
@@ -324,19 +334,19 @@ int main()
 
     //Function f(FunctionType::Quadric, params);
 
-    //params[0] = 1;
-    //params[1] = 1;
-    //params[2] = 0;
-    //params[3] = 0;
-
-    //Function f(FunctionType::Sin, params);
-
     params[0] = 1;
     params[1] = 1;
     params[2] = 0;
     params[3] = 0;
 
-    Function f(FunctionType::div_Log, params);
+    Function f(FunctionType::Sin, params);
+
+    //params[0] = 1;
+    //params[1] = 1;
+    //params[2] = 0;
+    //params[3] = 0;
+
+    //Function f(FunctionType::div_Log, params);
 
     //float params[2];
 
@@ -380,6 +390,19 @@ int main()
             if (event->is<sf::Event::MouseButtonReleased>())
             {
                 moving_camera = false;
+            }
+
+            if (event->is<sf::Event::KeyPressed>())
+            {
+                if (event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scan::LShift)
+                {
+                    camera.change_sample(SAMPLE_CHANGE);
+                }
+
+                if (event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scan::LControl)
+                {
+                    camera.change_sample(-SAMPLE_CHANGE);
+                }
             }
 
             if (moving_camera)
