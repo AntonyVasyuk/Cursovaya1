@@ -29,6 +29,15 @@ enum class FunctionType
     A_x
 };
 
+enum class IntegralType
+{
+    LeftRectangle,
+    RightRectangle,
+    MiddleRectangle,
+    Trapezoid
+};
+
+
 
 float calculate_integral_left_rectangle(std::function<float(float)> f, float a, float b, int n)
 {
@@ -139,7 +148,7 @@ public:
         }
     }
 
-    std::pair<int, int> calculate_position(int x, int y)
+    std::pair<float, float> calculate_position(float x, float y)
     {
         return std::make_pair(x - this->x, y - this->y);
     }
@@ -235,13 +244,14 @@ public:
     }
 
     //5648678777777777777777777777777777777777777777777777777777777777777
-    std::pair <float, float> calcualate_ranged_integral(float x1, float x2, int n)
+    std::pair <float, float> calcualate_ranged_integral(std::vector <sf::VertexArray> &integral_rectangles, float x1, float x2, int n)
     {
         return std::make_pair(calculate_integral_middle_rectangle(this->f, x1, x2, n), calculate_integral_trapezoid(this->f, x1, x2, n));
     }
     FunctionType get_type() { return this->type; }
 
     void add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray>& v);
+    void add_integral_to_vector(Camera camera, std::vector <sf::ConvexShape>& v, float x1, float x2, int n, IntegralType type);
 };
 
 
@@ -279,9 +289,63 @@ void Function::add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray
 }
 
 
+void Function::add_integral_to_vector(Camera camera, std::vector <sf::ConvexShape>& v, float x1, float x2, int n, IntegralType type)
+{
+    //float x1 = camera.get_range().first, x2 = camera.get_range().second;
+    //int n = camera.get_samples();
+
+    //int x1 = -10, x2 = 10, n = 200;
+
+    //cout << x1 << ' ' << x2 << '\n' << n << '\n';
+
+    auto c = camera.calculate_position(0, 0);
+
+    float dx = (x2 - x1) / n;
+    //std::cout << dx << std::endl;
+    float x_i = x1;
+    while (x_i < x2) {
+        float x_i1 = x_i + dx;
+
+        sf::ConvexShape rect;
+        rect.setPointCount(4);
+        auto c1 = camera.calculate_position(x_i * camera.get_scale(), -this->f(x_i) * camera.get_scale());
+        auto c2 = camera.calculate_position(x_i1 * camera.get_scale(), -this->f(x_i1) * camera.get_scale());
+        //cout << c2.first << ' ' << c2.second << '\n';
+        if (type == IntegralType::Trapezoid)
+        {
+            rect.setPoint(0, { c1.first, c1.second });
+            rect.setPoint(1, { c2.first, c2.second });
+            rect.setPoint(2, { c2.first, c.second });
+            rect.setPoint(3, { c1.first, c.second });
+        }
+        else if (type == IntegralType::MiddleRectangle)
+        {
+            rect.setPoint(0, { c1.first, (c1.second + c2.second) / 2 });
+            rect.setPoint(1, { c2.first, (c1.second + c2.second) / 2 });
+            rect.setPoint(2, { c2.first, c.second });
+            rect.setPoint(3, { c1.first, c.second });
+        }
+
+
+        rect.setFillColor(sf::Color(0, 0, 150, 100));
+        //rect[0].color = sf::Color({ 0, 0, 200 });
+        //rect[1].color = sf::Color({ 0, 0, 200 });
+        //rect[2].color = sf::Color({ 0, 0, 200 });
+        //rect[3].color = sf::Color({ 0, 0, 200 });
+
+        v.push_back(rect);
+        //cout << "1\n";
+
+        x_i += dx;
+    }
+
+    //cout << "1\n";
+}
+
+
 void draw_fancy(sf::RenderWindow& window, std::vector <sf::VertexArray>& fancy_lines, Camera camera)
 {
-    std::pair<int, int> c = camera.calculate_position(0, 0);
+    auto c = camera.calculate_position(0, 0);
 
     sf::VertexArray line1(sf::PrimitiveType::Lines, 2);
     line1[0].position = sf::Vector2f((float)c.first - 200, (float)c.second);
@@ -373,7 +437,7 @@ int main()
 
     std::vector <sf::VertexArray> lines;
     std::vector <sf::VertexArray> fancy_lines;
-    std::vector <sf::VertexArray> integral_rectangles;
+    std::vector <sf::ConvexShape> integral_rectangles;
 
     //f.add_graphic_to_vector(camera, lines, -2, 2, 10);
 
@@ -439,9 +503,16 @@ int main()
         //circle.setPosition({ (float)c.first, (float)c.second });
 
         lines.clear();
+        integral_rectangles.clear();
         f.add_graphic_to_vector(camera, lines);
+        f.add_integral_to_vector(camera, integral_rectangles, 0, 3, 20, IntegralType::MiddleRectangle);
 
         draw_fancy(window, fancy_lines, camera);
+
+        for (auto rect : integral_rectangles)
+        {
+            window.draw(rect);
+        }
 
         for (auto line : lines)
         {
