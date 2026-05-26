@@ -15,6 +15,8 @@ using std::ios;
 int SCALE = 50;
 int SCALE_CHANGE = 2;
 int SAMPLE_CHANGE = 50;
+int RANGE_CHANGE = 1;
+int INTEGRAL_SAMPLE_CHANGE = 5; 
 
 
 enum class FunctionType
@@ -159,11 +161,29 @@ public:
 
     std::pair<float, float> get_range() { return range; }
 
+    void change_range(float d1, float d2)
+    {
+        this->range = std::make_pair(this->range.first + d1, this->range.second + d2);
+    }
+
     std::pair<float, float> get_integral_range() { return integral_range; }
+
+    void change_integral_range(float d1, float d2)
+    {
+        this->integral_range = std::make_pair(this->integral_range.first + d1, this->integral_range.second + d2);
+    }
 
     int get_integral_samples() { return integral_samples; }
 
     IntegralType get_integral_type() { return integral_type; }
+
+    void change_integral_sample(int d)
+    {
+        if (this->integral_samples + d > 0)
+        {
+            this->integral_samples += d;
+        }
+    }
 
     int get_samples() { return samples; } 
 
@@ -467,21 +487,84 @@ int main()
 
             if (event->is<sf::Event::KeyPressed>())
             {
-                if (event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scan::LShift)
+
+                auto key = event->getIf<sf::Event::KeyPressed>();
+                if (key->scancode == sf::Keyboard::Scan::Hyphen)
                 {
-                    camera.change_sample(SAMPLE_CHANGE);
-                    cout << camera.get_samples();
+                    if (!key->control)
+                    {
+                        camera.change_sample(SAMPLE_CHANGE);
+                        //cout << camera.get_samples();
+                    }
+                    else
+                    {
+                        camera.change_integral_sample(INTEGRAL_SAMPLE_CHANGE);
+                    }
                 }
 
-                if (event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scan::LControl)
+                else if (key->scancode == sf::Keyboard::Scan::Equal)
                 {
-                    camera.change_sample(-SAMPLE_CHANGE);
-                    cout << camera.get_samples();
+                    if (!key->control)
+                    {
+                        camera.change_sample(-SAMPLE_CHANGE);
+                        //cout << camera.get_samples();
+                    }
+                    else
+                    {
+                        camera.change_integral_sample(-INTEGRAL_SAMPLE_CHANGE);
+                    }
+                }
+                else if (key->scancode == sf::Keyboard::Scan::D)
+                {
+                    if (!key->control)
+                    {
+                        camera.change_integral_range(RANGE_CHANGE, 0);
+                        //cout << camera.get_samples();
+                    }
+                    else
+                    {
+                        camera.change_range(RANGE_CHANGE, 0);
+                    }
+                }
+                else if (key->scancode == sf::Keyboard::Scan::A)
+                {
+                    if (!key->control)
+                    {
+                        camera.change_integral_range(-RANGE_CHANGE, 0);
+                        //cout << camera.get_samples();
+                    }
+                    else
+                    {
+                        camera.change_range(-RANGE_CHANGE, 0);
+                    }
+                }
+                else if (key->scancode == sf::Keyboard::Scan::E)
+                {
+                    if (!key->control)
+                    {
+                        camera.change_integral_range(0, RANGE_CHANGE);
+                        //cout << camera.get_samples();
+                    }
+                    else
+                    {
+                        camera.change_range(0, RANGE_CHANGE);
+                    }
+                }
+                else if (key->scancode == sf::Keyboard::Scan::Q)
+                {
+                    if (!key->control)
+                    {
+                        camera.change_integral_range(0, -RANGE_CHANGE);
+                        //cout << camera.get_samples();
+                    }
+                    else
+                    {
+                        camera.change_range(0, -RANGE_CHANGE);
+                    }
                 }
                 else
                 {
-                    auto mode = event->getIf<sf::Event::KeyPressed>()->scancode;
-                    switch (mode)
+                    switch (key->scancode)
                     {
                         case sf::Keyboard::Scan::Num1:
                     {
