@@ -244,6 +244,14 @@ public:
         //}
     }
 
+    Function& operator = (const Function& other)
+    {
+        type = other.type;
+        f = other.f;
+
+        return *this;
+    }
+
     //5648678777777777777777777777777777777777777777777777777777777777777
     std::pair <float, float> calcualate_ranged_integral(std::vector <sf::VertexArray> &integral_rectangles, float x1, float x2, int n)
     {
@@ -406,36 +414,17 @@ int main()
     bool moving_camera = false;
     std::pair<int, int> previous_position;
 
+    float params[10];
+    for (int i = 0; i < 10; i++) { params[i] = 0; }
+
+    int mode = 1;
+
+    params[0] = 2;
+    params[1] = 2;
+
+    Function f(FunctionType::Linear, params);
+
     //int scale = SCALE;
-
-    float params[3];
-
-    //params[0] = 0.1;
-    //params[1] = 0;
-    //params[2] = 1;
-
-    //Function f(FunctionType::Quadric, params);
-
-    //params[0] = 1;
-    //params[1] = 1;
-    //params[2] = 0;
-    //params[3] = 0;
-
-    //Function f(FunctionType::Sin, params);
-
-    params[0] = 1;
-    params[1] = 1;
-    params[2] = 0;
-    params[3] = 0;
-
-    Function f(FunctionType::div_Log, params);
-
-    //float params[2];
-
-    //params[0] = 2;
-    //params[1] = 2;
-
-    //Function f(FunctionType::Linear, params);
 
     std::vector <sf::VertexArray> lines;
     std::vector <sf::VertexArray> fancy_lines;
@@ -488,6 +477,88 @@ int main()
                 {
                     camera.change_sample(-SAMPLE_CHANGE);
                     cout << camera.get_samples();
+                }
+                else
+                {
+                    auto mode = event->getIf<sf::Event::KeyPressed>()->scancode;
+                    switch (mode)
+                    {
+                        case sf::Keyboard::Scan::Num1:
+                    {
+                        params[0] = 2;
+                        params[1] = 2;
+
+                        Function f1(FunctionType::Linear, params);
+                        f = f1;
+                        break;
+                    }
+
+                    case sf::Keyboard::Scan::Num2:
+                    {
+                        params[0] = 1;
+                        params[1] = 0;
+                        params[2] = 0;
+
+                        Function f1(FunctionType::Quadric, params);
+                        f = f1;
+                        break;
+                    }
+
+                    case sf::Keyboard::Scan::Num3:
+                    {
+                        params[0] = 1;
+                        params[1] = 0;
+                        params[2] = 0;
+                        params[3] = 0;
+
+                        Function f1(FunctionType::Qubic, params);
+                        f = f1;
+                        break;
+                    }
+
+                    case sf::Keyboard::Scan::Num4:
+                    {
+                        params[0] = 1;
+                        params[1] = 1;
+                        params[2] = 0;
+                        params[3] = 0;
+
+                        Function f1(FunctionType::Sin, params);
+                        f = f1;
+                        break;
+                    }
+
+                    case sf::Keyboard::Scan::Num5:
+                    {
+                        params[0] = 1;
+                        params[1] = 1;
+                        params[2] = 0;
+                        params[3] = 0;
+
+                        Function f1(FunctionType::Cos, params);
+                        f = f1;
+                        break;
+                    }
+
+                    case sf::Keyboard::Scan::Num6:
+                    {
+                        params[0] = 1;
+                        params[1] = 1;
+                        params[2] = 0;
+                        params[3] = 0;
+
+                        Function f1(FunctionType::div_Log, params);
+                        f = f1;
+                        break;
+                    }
+                    case sf::Keyboard::Scan::Num7:
+                    {
+                        Function f1(FunctionType::Sinx_x, params);
+                        f = f1;
+                        break;
+                    }
+
+                    }
                 }
             }
 
