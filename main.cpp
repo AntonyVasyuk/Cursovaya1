@@ -14,7 +14,7 @@ using std::ios;
 
 int SCALE = 50;
 int SCALE_CHANGE = 2;
-int SAMPLE_CHANGE = 1;
+int SAMPLE_CHANGE = 50;
 
 
 enum class FunctionType
@@ -103,17 +103,17 @@ class Camera
 private:
     float x;
     float y;
-    int *scale;
-    std::pair<int, int> range;
+    int scale;
+    std::pair<float, float> range;
     int samples;
 
 public:
-    Camera(float x, float y, int *scale, int x2, int x1, int n)
+    Camera(float x, float y, int scale, float x1, float x2, int n)
     {
         this->x = x;
         this->y = y;
         this->scale = scale;
-        this->range = std::make_pair(x2, x1);
+        this->range = std::make_pair(x1, x2);
         this->samples = n;
     }
 
@@ -121,6 +121,14 @@ public:
     {
         this->x += dx;
         this->y += dy;
+    }
+
+    void change_scale(int d)
+    {
+        if (this->scale + d > 0)
+        {
+            this->scale += d;
+        }
     }
 
     void change_sample(int d)
@@ -136,7 +144,7 @@ public:
         return std::make_pair(x - this->x, y - this->y);
     }
 
-    std::pair<int, int> get_range()
+    std::pair<float, float> get_range()
     {
         return range;
     }
@@ -146,7 +154,7 @@ public:
         return samples;
     }
 
-    int* get_scale()
+    int get_scale()
     {
         return this->scale;
     }
@@ -168,54 +176,54 @@ public:
         //cout << "1\n";
         switch (t)
         {
-            case FunctionType::Linear:
-            {
-                float k = params[0], b = params[1];
-                this->f = [k, b](float x) { return k * x + b; };
-                break;
-            }
-            case FunctionType::Quadric:
-            {
-                float a = params[0], b = params[1], c = params[2];
-                this->f = [a, b, c](float x) {return a * x * x + b * x + c; };
-                break;
-            }
-            case FunctionType::Qubic:
-            {
-                float a = params[0], b = params[1], c = params[2], d = params[3];
-                this->f = [a, b, c, d](float x) {return a * x * x * x + b * x * x + c * x + d; };
-                break;
-            }
-            case FunctionType::Sin:
-            {
-                float a = params[0], k = params[1], b = params[2], c = params[3];
-                this->f = [a, k, b, c](float x) {return a * std::sin(k * x + b) + c; };
-                break;
-            }
-            case FunctionType::Cos:
-            {
-                float a = params[0], k = params[1], b = params[2], c = params[3];
-                this->f = [a, k, b, c](float x) {return a * std::cos(k * x + b) + c; };
-                break;
-            }
-            case FunctionType::div_Log:
-            {
-                float l = params[0], k = params[1], b = params[2], c = params[3];
-                this->f = [l, k, b, c](float x) {return l / std::log(k * x + b) + c; };
-                break;
-            }
-            //case FunctionType::A_x:
-            //{
-            //    float l = params[0], a = params[1], k = params[2], b = params[3], c = params[4];
-            //    this->f = [l, a, k, b, c](float x) {return l * std::log(k * x + b) + c; };
-            //    break;
-            //}
-            case FunctionType::Sinx_x:
-            {
-                //float a = params[0], k = params[1], b = params[2], c = params[3];
-                this->f = [](float x) {return std::sin(x) / x; };
-                break;
-            }
+        case FunctionType::Linear:
+        {
+            float k = params[0], b = params[1];
+            this->f = [k, b](float x) { return k * x + b; };
+            break;
+        }
+        case FunctionType::Quadric:
+        {
+            float a = params[0], b = params[1], c = params[2];
+            this->f = [a, b, c](float x) {return a * x * x + b * x + c; };
+            break;
+        }
+        case FunctionType::Qubic:
+        {
+            float a = params[0], b = params[1], c = params[2], d = params[3];
+            this->f = [a, b, c, d](float x) {return a * x * x * x + b * x * x + c * x + d; };
+            break;
+        }
+        case FunctionType::Sin:
+        {
+            float a = params[0], k = params[1], b = params[2], c = params[3];
+            this->f = [a, k, b, c](float x) {return a * std::sin(k * x + b) + c; };
+            break;
+        }
+        case FunctionType::Cos:
+        {
+            float a = params[0], k = params[1], b = params[2], c = params[3];
+            this->f = [a, k, b, c](float x) {return a * std::cos(k * x + b) + c; };
+            break;
+        }
+        case FunctionType::div_Log:
+        {
+            float l = params[0], k = params[1], b = params[2], c = params[3];
+            this->f = [l, k, b, c](float x) {return l / std::log(k * x + b) + c; };
+            break;
+        }
+        //case FunctionType::A_x:
+        //{
+        //    float l = params[0], a = params[1], k = params[2], b = params[3], c = params[4];
+        //    this->f = [l, a, k, b, c](float x) {return l * std::log(k * x + b) + c; };
+        //    break;
+        //}
+        case FunctionType::Sinx_x:
+        {
+            //float a = params[0], k = params[1], b = params[2], c = params[3];
+            this->f = [](float x) {return std::sin(x) / x; };
+            break;
+        }
         }
 
         //this->parameters = new float[size];
@@ -239,8 +247,12 @@ public:
 
 void Function::add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray>& v)
 {
-    int x1 = camera.get_range().first, x2 = camera.get_range().second;
+    float x1 = camera.get_range().first, x2 = camera.get_range().second;
     int n = camera.get_samples();
+
+    //int x1 = -10, x2 = 10, n = 200;
+
+    //cout << x1 << ' ' << x2 << '\n' << n << '\n';
 
     float dx = (x2 - x1) / n;
     //std::cout << dx << std::endl;
@@ -249,8 +261,8 @@ void Function::add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray
         float x_i1 = x_i + dx;
 
         sf::VertexArray line(sf::PrimitiveType::Lines, 2);
-        auto c1 = camera.calculate_position(x_i * *camera.get_scale(), -this->f(x_i) * *camera.get_scale());
-        auto c2 = camera.calculate_position(x_i1 * *camera.get_scale(), -this->f(x_i1) * *camera.get_scale());
+        auto c1 = camera.calculate_position(x_i * camera.get_scale(), -this->f(x_i) * camera.get_scale());
+        auto c2 = camera.calculate_position(x_i1 * camera.get_scale(), -this->f(x_i1) * camera.get_scale());
         line[0].position = sf::Vector2f(c1.first, c1.second);
         line[1].position = sf::Vector2f(c2.first, c2.second);
 
@@ -262,11 +274,15 @@ void Function::add_graphic_to_vector(Camera camera, std::vector <sf::VertexArray
 
         x_i += dx;
     }
+
+    //cout << "1\n";
 }
 
 
-void draw_fancy(sf::RenderWindow& window, std::pair<int, int>& c, std::vector <sf::VertexArray>& fancy_lines, Camera camera)
+void draw_fancy(sf::RenderWindow& window, std::vector <sf::VertexArray>& fancy_lines, Camera camera)
 {
+    std::pair<int, int> c = camera.calculate_position(0, 0);
+
     sf::VertexArray line1(sf::PrimitiveType::Lines, 2);
     line1[0].position = sf::Vector2f((float)c.first - 200, (float)c.second);
     line1[1].position = sf::Vector2f((float)c.first + 2000, (float)c.second);
@@ -289,8 +305,8 @@ void draw_fancy(sf::RenderWindow& window, std::pair<int, int>& c, std::vector <s
     {
         {
             sf::VertexArray line(sf::PrimitiveType::Lines, 2);
-            line[0].position = sf::Vector2f((float)c.first + i * *camera.get_scale(), (float)c.second + 5);
-            line[1].position = sf::Vector2f((float)c.first + i * *camera.get_scale(), (float)c.second - 5);
+            line[0].position = sf::Vector2f((float)c.first + i * camera.get_scale(), (float)c.second + 5);
+            line[1].position = sf::Vector2f((float)c.first + i * camera.get_scale(), (float)c.second - 5);
 
             line[0].color = sf::Color({ 0, 0, 0 });
             line[1].color = sf::Color({ 0, 0, 0 });
@@ -298,8 +314,8 @@ void draw_fancy(sf::RenderWindow& window, std::pair<int, int>& c, std::vector <s
         }
         {
             sf::VertexArray line(sf::PrimitiveType::Lines, 2);
-            line[0].position = sf::Vector2f((float)c.first + 5, (float)c.second - i * *camera.get_scale());
-            line[1].position = sf::Vector2f((float)c.first - 5, (float)c.second - i * *camera.get_scale());
+            line[0].position = sf::Vector2f((float)c.first + 5, (float)c.second - i * camera.get_scale());
+            line[1].position = sf::Vector2f((float)c.first - 5, (float)c.second - i * camera.get_scale());
 
             line[0].color = sf::Color({ 0, 0, 0 });
             line[1].color = sf::Color({ 0, 0, 0 });
@@ -318,9 +334,9 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Graphics");
 
-    int *scale = &SCALE;
+    //int *scale = &SCALE;
 
-    Camera camera(-20, -580, scale, -10, 10, 200);
+    Camera camera(-20, -580, SCALE, -10, 10, 200);
     bool moving_camera = false;
     std::pair<int, int> previous_position;
 
@@ -334,19 +350,19 @@ int main()
 
     //Function f(FunctionType::Quadric, params);
 
-    params[0] = 1;
-    params[1] = 1;
-    params[2] = 0;
-    params[3] = 0;
-
-    Function f(FunctionType::Sin, params);
-
     //params[0] = 1;
     //params[1] = 1;
     //params[2] = 0;
     //params[3] = 0;
 
-    //Function f(FunctionType::div_Log, params);
+    //Function f(FunctionType::Sin, params);
+
+    params[0] = 1;
+    params[1] = 1;
+    params[2] = 0;
+    params[3] = 0;
+
+    Function f(FunctionType::div_Log, params);
 
     //float params[2];
 
@@ -357,6 +373,7 @@ int main()
 
     std::vector <sf::VertexArray> lines;
     std::vector <sf::VertexArray> fancy_lines;
+    std::vector <sf::VertexArray> integral_rectangles;
 
     //f.add_graphic_to_vector(camera, lines, -2, 2, 10);
 
@@ -383,7 +400,8 @@ int main()
                 int d = event->getIf<sf::Event::MouseWheelScrolled>()->delta;
 
                 //cout << d << '\n';
-                *scale += SCALE_CHANGE * d;
+                camera.change_scale(SCALE_CHANGE * d);
+                
                 //camera.set_scale(scale);
             }
 
@@ -397,11 +415,13 @@ int main()
                 if (event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scan::LShift)
                 {
                     camera.change_sample(SAMPLE_CHANGE);
+                    cout << camera.get_samples();
                 }
 
                 if (event->getIf<sf::Event::KeyPressed>()->scancode == sf::Keyboard::Scan::LControl)
                 {
                     camera.change_sample(-SAMPLE_CHANGE);
+                    cout << camera.get_samples();
                 }
             }
 
@@ -414,15 +434,14 @@ int main()
             }
         }
 
-        window.clear(sf::Color({200, 200, 200}));
+        window.clear(sf::Color({ 200, 200, 200 }));
 
-        std::pair<int, int> c = camera.calculate_position(0, 0);
         //circle.setPosition({ (float)c.first, (float)c.second });
 
         lines.clear();
         f.add_graphic_to_vector(camera, lines);
 
-        draw_fancy(window, c, fancy_lines, camera);
+        draw_fancy(window, fancy_lines, camera);
 
         for (auto line : lines)
         {
