@@ -161,12 +161,22 @@ public:
 
     std::pair<float, float> get_range() { return range; }
 
+    void set_range(float d1, float d2)
+    {
+        this->range = std::make_pair(d1, d2);
+    }
+
     void change_range(float d1, float d2)
     {
         this->range = std::make_pair(this->range.first + d1, this->range.second + d2);
     }
 
     std::pair<float, float> get_integral_range() { return integral_range; }
+
+    void set_integral_range(float d1, float d2)
+    {
+        this->integral_range = std::make_pair(d1, d2);
+    }
 
     void change_integral_range(float d1, float d2)
     {
@@ -424,9 +434,211 @@ void draw_fancy(sf::RenderWindow& window, std::vector <sf::VertexArray>& fancy_l
 }
 
 
+void change_function(sf::Keyboard::Scancode scancode, float (&params)[10], Function &f)
+{
+    switch (scancode)
+    {
+    case sf::Keyboard::Scan::Num1:
+    {
+        params[0] = 2;
+        params[1] = 2;
+
+        Function f1(FunctionType::Linear, params);
+        f = f1;
+        break;
+    }
+
+    case sf::Keyboard::Scan::Num2:
+    {
+        params[0] = 1;
+        params[1] = 0;
+        params[2] = 0;
+
+        Function f1(FunctionType::Quadric, params);
+        f = f1;
+        break;
+    }
+
+    case sf::Keyboard::Scan::Num3:
+    {
+        params[0] = 1;
+        params[1] = 0;
+        params[2] = 0;
+        params[3] = 0;
+
+        Function f1(FunctionType::Qubic, params);
+        f = f1;
+        break;
+    }
+
+    case sf::Keyboard::Scan::Num4:
+    {
+        params[0] = 1;
+        params[1] = 1;
+        params[2] = 0;
+        params[3] = 0;
+
+        Function f1(FunctionType::Sin, params);
+        f = f1;
+        break;
+    }
+
+    case sf::Keyboard::Scan::Num5:
+    {
+        params[0] = 1;
+        params[1] = 1;
+        params[2] = 0;
+        params[3] = 0;
+
+        Function f1(FunctionType::Cos, params);
+        f = f1;
+        break;
+    }
+
+    case sf::Keyboard::Scan::Num6:
+    {
+        params[0] = 1;
+        params[1] = 1;
+        params[2] = 0;
+        params[3] = 0;
+
+        Function f1(FunctionType::div_Log, params);
+        f = f1;
+        break;
+    }
+    case sf::Keyboard::Scan::Num7:
+    {
+        Function f1(FunctionType::Sinx_x, params);
+        f = f1;
+        break;
+    }
+
+    }
+}
+
+
+void calculate_integral_and_print(Function &f, Camera &camera)
+{
+
+}
+
+
+void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_console_mode)
+{
+    cout << "\n\nWhat do you want to do (the actions will appear once you exit console mode)?";
+    cout << "\n 1. Set function type";
+    cout << "\n 2. Set function range";
+    cout << "\n 3. Set function accuracy\n";
+
+    cout << "\n 4. Set integral type";
+    cout << "\n 5. Set integral range";
+    cout << "\n 6. Set integral accuracy";
+    cout << "\n 7 (or q). Quit console mode\t";
+    //cout << "\n 1. Set ";
+    //cout << "\n 1. Set ";
+
+    char c;
+    cin >> c;
+
+    switch (c)
+    {
+    case '1':
+        cout << "Which function type you want?";
+        cout << "\n 1. Linear\n 2. Quadric\n 3. Qubic\n 4. Sin(x)\n 5. Cos(x)\n 6. 1 / ln(x)\n 7. Sin(x) / x\n ";
+        sf::Keyboard::Scancode scancode;
+
+        cin >> c;
+
+        switch (c)
+        {
+        case '1':
+            scancode = sf::Keyboard::Scan::Num1;
+            break;
+        case '2':
+            scancode = sf::Keyboard::Scan::Num2;
+            break;
+        case '3':
+            scancode = sf::Keyboard::Scan::Num3;
+            break;
+        case '4':
+            scancode = sf::Keyboard::Scan::Num4;
+            break;
+        case '5':
+            scancode = sf::Keyboard::Scan::Num5;
+            break;
+        case '6':
+            scancode = sf::Keyboard::Scan::Num6;
+            break;
+        case '7':
+            scancode = sf::Keyboard::Scan::Num7;
+            break;
+        }
+
+        change_function(scancode, params, f);
+        break;
+    case '2':
+
+    case '3':
+
+    case '4':
+
+    case '5':
+
+    case '6':
+
+    case '7':
+        cout << "\n\t Console mode is now OFF\n ";
+        is_console_mode = false;
+        break;
+    case 'q':
+        cout << "\n\t Console mode is now OFF\n ";
+        is_console_mode = false;
+        break;
+    }
+}
+
+
+void console_mode(Function &f, float(&params)[10], Camera &camera, bool &is_console_mode)
+{
+    cout << "\n\n\t Console mode is now ON\n ";
+    //cout << "To exit console mode and return to window enter \"q\"\n ";
+    cout << "The current function integral equals:\n";
+
+    calculate_integral_and_print(f, camera);
+
+    made_actions(f, params, camera, is_console_mode);
+}
+
+
+void greetings_ENG()
+{
+    cout << "\tHello!\n In this app you can calculate ranged integrals and see different information in the little window.\n ";
+    cout << "Functions that you can draw:";
+    cout << "\n 1. Linear\n 2. Quadric\n 3. Qubic\n 4. Sin(x)\n 5. Cos(x)\n 6. 1 / ln(x)\n 7. Sin(x) / x\n ";
+    cout << "Right now the window represents the graph of linear function y = x + 1\n ";
+    cout << "To change function you should tap the number button(representing function number in list)\non your keyboard, the window must be in focus.";
+    cout << "Controls that you have:";
+    cout << "\n > By clicking and dragging mouse you can move the camera";
+    cout << "\n > By scrolling mouse wheel you can change the scale\n";
+    cout << "\n > By pressing \"=\" and \"-\" you can set the number of devidings (samples) (with wich the window is drawing integral)\nhigher or lower resspectively";
+    cout << "\n > By adding CTRL to previous two buttons, you can do the same thing, but for drawing graph\n";
+    cout << "\n > By pressing A and D you can move inregral's left bounder of range of calculating left or right, respectively";
+    cout << "\n > By pressing Q and E you can do the same thing with right bounder";
+    cout << "\n > By adding CTRL to previous four keys you can do same things with graph boundaries\n";
+    cout << "\n > By pressing Enter you can enter console mode, where you can set all the settings by hand in the console\n";
+}
+
+//void greetings_RUS()
+//{
+//    cout << "\t Привет!";
+//}
+
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 800, 600 }), "Graphics");
+
+    window.setFramerateLimit(60);
 
     //int *scale = &SCALE;
 
@@ -437,7 +649,8 @@ int main()
     float params[10];
     for (int i = 0; i < 10; i++) { params[i] = 0; }
 
-    int mode = 1;
+    bool is_console_mode = false;
+    //int mode = 1;
 
     params[0] = 2;
     params[1] = 2;
@@ -452,8 +665,18 @@ int main()
 
     //f.add_graphic_to_vector(camera, lines, -2, 2, 10);
 
+    greetings_ENG();
+    //greetings_RUS();
+
     while (window.isOpen())
     {
+        if (is_console_mode)
+        {
+            //console_mode(f, camera);
+            made_actions(f, params, camera, is_console_mode);
+            window.requestFocus();
+        }
+
         // check all the window's events that were triggered since the last iteration of the loop
         while (const std::optional event = window.pollEvent())
         {
@@ -489,22 +712,10 @@ int main()
             {
 
                 auto key = event->getIf<sf::Event::KeyPressed>();
+
                 if (key->scancode == sf::Keyboard::Scan::Hyphen)
                 {
-                    if (!key->control)
-                    {
-                        camera.change_sample(SAMPLE_CHANGE);
-                        //cout << camera.get_samples();
-                    }
-                    else
-                    {
-                        camera.change_integral_sample(INTEGRAL_SAMPLE_CHANGE);
-                    }
-                }
-
-                else if (key->scancode == sf::Keyboard::Scan::Equal)
-                {
-                    if (!key->control)
+                    if (key->control)
                     {
                         camera.change_sample(-SAMPLE_CHANGE);
                         //cout << camera.get_samples();
@@ -512,6 +723,18 @@ int main()
                     else
                     {
                         camera.change_integral_sample(-INTEGRAL_SAMPLE_CHANGE);
+                    }
+                }
+                else if (key->scancode == sf::Keyboard::Scan::Equal)
+                {
+                    if (key->control)
+                    {
+                        camera.change_sample(SAMPLE_CHANGE);
+                        //cout << camera.get_samples();
+                    }
+                    else
+                    {
+                        camera.change_integral_sample(INTEGRAL_SAMPLE_CHANGE);
                     }
                 }
                 else if (key->scancode == sf::Keyboard::Scan::D)
@@ -562,86 +785,15 @@ int main()
                         camera.change_range(0, -RANGE_CHANGE);
                     }
                 }
+                else if (key->scancode == sf::Keyboard::Scan::Enter)
+                {
+                    is_console_mode = true;
+                    console_mode(f, params, camera, is_console_mode);
+                    window.requestFocus();
+                }
                 else
                 {
-                    switch (key->scancode)
-                    {
-                        case sf::Keyboard::Scan::Num1:
-                    {
-                        params[0] = 2;
-                        params[1] = 2;
-
-                        Function f1(FunctionType::Linear, params);
-                        f = f1;
-                        break;
-                    }
-
-                    case sf::Keyboard::Scan::Num2:
-                    {
-                        params[0] = 1;
-                        params[1] = 0;
-                        params[2] = 0;
-
-                        Function f1(FunctionType::Quadric, params);
-                        f = f1;
-                        break;
-                    }
-
-                    case sf::Keyboard::Scan::Num3:
-                    {
-                        params[0] = 1;
-                        params[1] = 0;
-                        params[2] = 0;
-                        params[3] = 0;
-
-                        Function f1(FunctionType::Qubic, params);
-                        f = f1;
-                        break;
-                    }
-
-                    case sf::Keyboard::Scan::Num4:
-                    {
-                        params[0] = 1;
-                        params[1] = 1;
-                        params[2] = 0;
-                        params[3] = 0;
-
-                        Function f1(FunctionType::Sin, params);
-                        f = f1;
-                        break;
-                    }
-
-                    case sf::Keyboard::Scan::Num5:
-                    {
-                        params[0] = 1;
-                        params[1] = 1;
-                        params[2] = 0;
-                        params[3] = 0;
-
-                        Function f1(FunctionType::Cos, params);
-                        f = f1;
-                        break;
-                    }
-
-                    case sf::Keyboard::Scan::Num6:
-                    {
-                        params[0] = 1;
-                        params[1] = 1;
-                        params[2] = 0;
-                        params[3] = 0;
-
-                        Function f1(FunctionType::div_Log, params);
-                        f = f1;
-                        break;
-                    }
-                    case sf::Keyboard::Scan::Num7:
-                    {
-                        Function f1(FunctionType::Sinx_x, params);
-                        f = f1;
-                        break;
-                    }
-
-                    }
+                    change_function(key->scancode, params, f);
                 }
             }
 
@@ -674,6 +826,8 @@ int main()
         {
             window.draw(line);
         }
+
+        //draw_info(window, camera, f);
 
         window.display();
     }
