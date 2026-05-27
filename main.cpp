@@ -525,15 +525,16 @@ void calculate_integral_and_print(Function &f, Camera &camera)
 
 void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_console_mode)
 {
-    cout << "\n\nWhat do you want to do (the actions will appear once you exit console mode)?";
+    cout << "\n\nWhat do you want to do (the actions will appear after the option is done)?";
+    cout << "\n 0. Calculate integral and show all information";
     cout << "\n 1. Set function type";
     cout << "\n 2. Set function range";
-    cout << "\n 3. Set function accuracy\n";
+    cout << "\n 3. Set function accuracy";
 
-    cout << "\n 4. Set integral type";
-    cout << "\n 5. Set integral range";
-    cout << "\n 6. Set integral accuracy";
-    cout << "\n 7 (or q). Quit console mode\t";
+    //cout << "\n 4. Set integral type";
+    cout << "\n 4. Set integral range";
+    cout << "\n 5. Set integral accuracy";
+    cout << "\n q. Quit console mode\t";
     //cout << "\n 1. Set ";
     //cout << "\n 1. Set ";
 
@@ -542,6 +543,9 @@ void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_cons
 
     switch (c)
     {
+    case '0':
+        calculate_integral_and_print(f, camera);
+        break;
     case '1':
         cout << "Which function type you want?";
         cout << "\n 1. Linear\n 2. Quadric\n 3. Qubic\n 4. Sin(x)\n 5. Cos(x)\n 6. 1 / ln(x)\n 7. Sin(x) / x\n ";
@@ -577,19 +581,37 @@ void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_cons
         change_function(scancode, params, f);
         break;
     case '2':
-
-    case '3':
-
-    case '4':
-
-    case '5':
-
-    case '6':
-
-    case '7':
-        cout << "\n\t Console mode is now OFF\n ";
-        is_console_mode = false;
+    {
+        cout << "Enter new range for function (left and right divided by space):\t";
+        float x1, x2;
+        cin >> x1 >> x2;
+        camera.set_range(x1, x2);
         break;
+    }
+    case '3':
+    {
+        cout << "Enter accuracy for function:\t";
+        int n;
+        cin >> n;
+        camera.change_sample(n);
+        break;
+    }
+    case '4':
+    {
+        cout << "Enter new range for integral (left and right divided by space):\t";
+        float x1, x2;
+        cin >> x1 >> x2;
+        camera.set_integral_range(x1, x2);
+        break;
+    }
+    case '5':
+    {
+        cout << "Enter accuracy for integral:\t";
+        int n;
+        cin >> n;
+        camera.change_integral_sample(n);
+        break;
+    }
     case 'q':
         cout << "\n\t Console mode is now OFF\n ";
         is_console_mode = false;
@@ -619,12 +641,12 @@ void greetings_ENG()
     cout << "To change function you should tap the number button(representing function number in list)\non your keyboard, the window must be in focus.";
     cout << "Controls that you have:";
     cout << "\n > By clicking and dragging mouse you can move the camera";
-    cout << "\n > By scrolling mouse wheel you can change the scale\n";
+    cout << "\n > By scrolling mouse wheel you can change the scale";
     cout << "\n > By pressing \"=\" and \"-\" you can set the number of devidings (samples) (with wich the window is drawing integral)\nhigher or lower resspectively";
-    cout << "\n > By adding CTRL to previous two buttons, you can do the same thing, but for drawing graph\n";
+    cout << "\n > By adding CTRL to previous two buttons, you can do the same thing, but for drawing graph";
     cout << "\n > By pressing A and D you can move inregral's left bounder of range of calculating left or right, respectively";
     cout << "\n > By pressing Q and E you can do the same thing with right bounder";
-    cout << "\n > By adding CTRL to previous four keys you can do same things with graph boundaries\n";
+    cout << "\n > By adding CTRL to previous four keys you can do same things with graph boundaries";
     cout << "\n > By pressing Enter you can enter console mode, where you can set all the settings by hand in the console\n";
 }
 
