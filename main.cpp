@@ -19,6 +19,9 @@ int RANGE_CHANGE = 1;
 int INTEGRAL_SAMPLE_CHANGE = 5; 
 
 
+const int NUMBER_OF_FUNCTIONS = 7;
+const int NUMBER_OF_PARAMS = 10;
+
 enum class FunctionType
 {
     Linear,
@@ -205,50 +208,55 @@ class Function
 {
 private:
     FunctionType type;
+    //float (&params)[10];
     std::function<float(float)> f;
     //float* parameters;
 
 public:
-    Function(FunctionType t, float* params)
+    Function(FunctionType t, float (& params)[NUMBER_OF_PARAMS])
     {
         this->type = t;
         int size;
+        //for (int i = 0; i < 10; i++)
+        //{
+        //    this->params[i] = parameters[i];
+        //}
         //cout << "1\n";
         switch (t)
         {
         case FunctionType::Linear:
         {
-            float k = params[0], b = params[1];
+            float &k = params[0], &b = params[1];
             this->f = [k, b](float x) { return k * x + b; };
             break;
         }
         case FunctionType::Quadric:
         {
-            float a = params[0], b = params[1], c = params[2];
+            float &a = params[0], &b = params[1], &c = params[2];
             this->f = [a, b, c](float x) {return a * x * x + b * x + c; };
             break;
         }
         case FunctionType::Qubic:
         {
-            float a = params[0], b = params[1], c = params[2], d = params[3];
+            float &a = params[0], &b = params[1], &c = params[2], &d = params[3];
             this->f = [a, b, c, d](float x) {return a * x * x * x + b * x * x + c * x + d; };
             break;
         }
         case FunctionType::Sin:
         {
-            float a = params[0], k = params[1], b = params[2], c = params[3];
+            float &a = params[0], &k = params[1], &b = params[2], &c = params[3];
             this->f = [a, k, b, c](float x) {return a * std::sin(k * x + b) + c; };
             break;
         }
         case FunctionType::Cos:
         {
-            float a = params[0], k = params[1], b = params[2], c = params[3];
+            float &a = params[0], &k = params[1], &b = params[2], &c = params[3];
             this->f = [a, k, b, c](float x) {return a * std::cos(k * x + b) + c; };
             break;
         }
         case FunctionType::div_Log:
         {
-            float l = params[0], k = params[1], b = params[2], c = params[3];
+            float &l = params[0], &k = params[1], &b = params[2], &c = params[3];
             this->f = [l, k, b, c](float x) {return l / std::log(k * x + b) + c; };
             break;
         }
@@ -282,7 +290,6 @@ public:
         return *this;
     }
 
-    //5648678777777777777777777777777777777777777777777777777777777777777
     std::pair <float, float> calcualate_ranged_integral(std::vector <sf::VertexArray> &integral_rectangles, float x1, float x2, int n)
     {
         return std::make_pair(calculate_integral_middle_rectangle(this->f, x1, x2, n), calculate_integral_trapezoid(this->f, x1, x2, n));
@@ -434,81 +441,54 @@ void draw_fancy(sf::RenderWindow& window, std::vector <sf::VertexArray>& fancy_l
 }
 
 
-void change_function(sf::Keyboard::Scancode scancode, float (&params)[10], Function &f)
+void change_function(sf::Keyboard::Scancode scancode, float (&params)[NUMBER_OF_FUNCTIONS][NUMBER_OF_PARAMS], Function &f)
 {
     switch (scancode)
     {
     case sf::Keyboard::Scan::Num1:
     {
-        params[0] = 2;
-        params[1] = 2;
-
-        Function f1(FunctionType::Linear, params);
+        Function f1(FunctionType::Linear, params[0]);
         f = f1;
         break;
     }
 
     case sf::Keyboard::Scan::Num2:
     {
-        params[0] = 1;
-        params[1] = 0;
-        params[2] = 0;
-
-        Function f1(FunctionType::Quadric, params);
+        Function f1(FunctionType::Quadric, params[1]);
         f = f1;
         break;
     }
 
     case sf::Keyboard::Scan::Num3:
     {
-        params[0] = 1;
-        params[1] = 0;
-        params[2] = 0;
-        params[3] = 0;
-
-        Function f1(FunctionType::Qubic, params);
+        Function f1(FunctionType::Qubic, params[2]);
         f = f1;
         break;
     }
 
     case sf::Keyboard::Scan::Num4:
     {
-        params[0] = 1;
-        params[1] = 1;
-        params[2] = 0;
-        params[3] = 0;
-
-        Function f1(FunctionType::Sin, params);
+        Function f1(FunctionType::Sin, params[3]);
         f = f1;
         break;
     }
 
     case sf::Keyboard::Scan::Num5:
     {
-        params[0] = 1;
-        params[1] = 1;
-        params[2] = 0;
-        params[3] = 0;
-
-        Function f1(FunctionType::Cos, params);
+        Function f1(FunctionType::Cos, params[4]);
         f = f1;
         break;
     }
 
     case sf::Keyboard::Scan::Num6:
     {
-        params[0] = 1;
-        params[1] = 1;
-        params[2] = 0;
-        params[3] = 0;
-
-        Function f1(FunctionType::div_Log, params);
+        Function f1(FunctionType::div_Log, params[5]);
         f = f1;
         break;
     }
     case sf::Keyboard::Scan::Num7:
     {
-        Function f1(FunctionType::Sinx_x, params);
+        Function f1(FunctionType::Sinx_x, params[6]);
         f = f1;
         break;
     }
@@ -530,7 +510,7 @@ void calculate_integral_and_print(Function &f, Camera &camera)
 }
 
 
-void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_console_mode)
+void made_actions(Function& f, float(&params)[NUMBER_OF_FUNCTIONS][NUMBER_OF_PARAMS], Camera& camera, bool &is_console_mode)
 {
     cout << "\n\nWhat do you want to do (the actions will appear on window after the option is done)?";
     cout << "\n 1. Calculate integral and show all information";
@@ -678,7 +658,7 @@ void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_cons
 }
 
 
-void console_mode(Function &f, float(&params)[10], Camera &camera, bool &is_console_mode)
+void console_mode(Function &f, float(&params)[NUMBER_OF_FUNCTIONS][NUMBER_OF_PARAMS], Camera &camera, bool &is_console_mode)
 {
     cout << "\n\n\t Console mode is now ON\n ";
     //cout << "To exit console mode and return to window enter \"q\"\n ";
@@ -726,16 +706,48 @@ int main()
     bool moving_camera = false;
     std::pair<int, int> previous_position;
 
-    float params[10];
-    for (int i = 0; i < 10; i++) { params[i] = 0; }
+    float params[NUMBER_OF_FUNCTIONS][NUMBER_OF_PARAMS];
+    for (int i = 0; i < NUMBER_OF_FUNCTIONS; i++)
+    {
+        for (int j = 0; j < NUMBER_OF_PARAMS; j++)
+        {
+            params[i][j] = 0;
+        }
+    }
+
+    {
+        params[0][0] = 2;
+        params[0][1] = 2;
+
+        params[1][0] = 1;
+        params[1][1] = 0;
+        params[1][2] = 0;
+
+        params[2][0] = 1;
+        params[2][1] = 0;
+        params[2][2] = 0;
+        params[2][3] = 0;
+
+        params[3][0] = 1;
+        params[3][1] = 1;
+        params[3][2] = 0;
+        params[3][3] = 0;
+
+        params[4][0] = 1;
+        params[4][1] = 1;
+        params[4][2] = 0;
+        params[4][3] = 0;
+
+        params[5][0] = 1;
+        params[5][1] = 1;
+        params[5][2] = 0;
+        params[5][3] = 0;
+    }
 
     bool is_console_mode = false;
     //int mode = 1;
 
-    params[0] = 2;
-    params[1] = 2;
-
-    Function f(FunctionType::Linear, params);
+    Function f(FunctionType::Linear, params[0]);
 
     //int scale = SCALE;
 
