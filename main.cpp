@@ -517,6 +517,13 @@ void change_function(sf::Keyboard::Scancode scancode, float (&params)[10], Funct
 }
 
 
+void show_info(Function f, Camera camera)
+{
+    cout << "\tCurrent parameteres are:";
+    cout << "";
+}
+
+
 void calculate_integral_and_print(Function &f, Camera &camera)
 {
 
@@ -525,15 +532,16 @@ void calculate_integral_and_print(Function &f, Camera &camera)
 
 void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_console_mode)
 {
-    cout << "\n\nWhat do you want to do (the actions will appear after the option is done)?";
-    cout << "\n 0. Calculate integral and show all information";
-    cout << "\n 1. Set function type";
-    cout << "\n 2. Set function range";
-    cout << "\n 3. Set function accuracy";
+    cout << "\n\nWhat do you want to do (the actions will appear on window after the option is done)?";
+    cout << "\n 1. Calculate integral and show all information";
+    cout << "\n 2. Set function coefficients";
+    cout << "\n 3. Set function type";
+    cout << "\n 4. Set function range";
+    cout << "\n 5. Set function accuracy";
 
     //cout << "\n 4. Set integral type";
-    cout << "\n 4. Set integral range";
-    cout << "\n 5. Set integral accuracy";
+    cout << "\n 6. Set integral range";
+    cout << "\n 7. Set integral accuracy";
     cout << "\n q. Quit console mode\t";
     //cout << "\n 1. Set ";
     //cout << "\n 1. Set ";
@@ -543,10 +551,60 @@ void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_cons
 
     switch (c)
     {
-    case '0':
-        calculate_integral_and_print(f, camera);
-        break;
-    case '1':
+    //case '1':
+    //    calculate_integral_and_print(f, camera);
+    //    break;
+    //case '2':
+    //    switch (f.get_type())
+    //    {
+    //    case FunctionType::Linear:
+    //    {
+
+    //        break;
+    //    }
+    //    case FunctionType::Quadric:
+    //    {
+
+    //        break;
+    //    }
+    //    case FunctionType::Qubic:
+    //    {
+    //        float a = params[0], b = params[1], c = params[2], d = params[3];
+    //        this->f = [a, b, c, d](float x) {return a * x * x * x + b * x * x + c * x + d; };
+    //        break;
+    //    }
+    //    case FunctionType::Sin:
+    //    {
+    //        float a = params[0], k = params[1], b = params[2], c = params[3];
+    //        this->f = [a, k, b, c](float x) {return a * std::sin(k * x + b) + c; };
+    //        break;
+    //    }
+    //    case FunctionType::Cos:
+    //    {
+    //        float a = params[0], k = params[1], b = params[2], c = params[3];
+    //        this->f = [a, k, b, c](float x) {return a * std::cos(k * x + b) + c; };
+    //        break;
+    //    }
+    //    case FunctionType::div_Log:
+    //    {
+    //        float l = params[0], k = params[1], b = params[2], c = params[3];
+    //        this->f = [l, k, b, c](float x) {return l / std::log(k * x + b) + c; };
+    //        break;
+    //    }
+    //    //case FunctionType::A_x:
+    //    //{
+    //    //    float l = params[0], a = params[1], k = params[2], b = params[3], c = params[4];
+    //    //    this->f = [l, a, k, b, c](float x) {return l * std::log(k * x + b) + c; };
+    //    //    break;
+    //    //}
+    //    case FunctionType::Sinx_x:
+    //    {
+    //        //float a = params[0], k = params[1], b = params[2], c = params[3];
+    //        this->f = [](float x) {return std::sin(x) / x; };
+    //        break;
+    //    }
+        //}
+    case '3':
         cout << "Which function type you want?";
         cout << "\n 1. Linear\n 2. Quadric\n 3. Qubic\n 4. Sin(x)\n 5. Cos(x)\n 6. 1 / ln(x)\n 7. Sin(x) / x\n ";
         sf::Keyboard::Scancode scancode;
@@ -580,7 +638,7 @@ void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_cons
 
         change_function(scancode, params, f);
         break;
-    case '2':
+    case '4':
     {
         cout << "Enter new range for function (left and right divided by space):\t";
         float x1, x2;
@@ -588,7 +646,7 @@ void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_cons
         camera.set_range(x1, x2);
         break;
     }
-    case '3':
+    case '5':
     {
         cout << "Enter accuracy for function:\t";
         int n;
@@ -596,7 +654,7 @@ void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_cons
         camera.change_sample(n);
         break;
     }
-    case '4':
+    case '6':
     {
         cout << "Enter new range for integral (left and right divided by space):\t";
         float x1, x2;
@@ -604,7 +662,7 @@ void made_actions(Function& f, float(&params)[10], Camera& camera, bool &is_cons
         camera.set_integral_range(x1, x2);
         break;
     }
-    case '5':
+    case '7':
     {
         cout << "Enter accuracy for integral:\t";
         int n;
