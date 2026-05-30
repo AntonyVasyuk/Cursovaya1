@@ -633,7 +633,7 @@ ostream& operator <<(ostream& out, Function f)
 
 void show_info(Function &f, float(&params)[NUMBER_OF_FUNCTIONS][NUMBER_OF_PARAMS], Camera &camera)
 {
-    cout << "Current function is: " << f << ", ";
+    cout << "Current function is: " << f;
     switch (f.get_type())
     {
         case FunctionType::Linear:
